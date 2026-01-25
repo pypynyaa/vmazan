@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>До момента</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,700;1,400&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0001;
+      --bordowy: #5c0f1f;
+      --bordowy-light: #7a1a2e;
+      --gold: #c9a347;
+      --text: #d9c9a0;
+      --shadow: 0 0 40px rgba(92,15,31,0.6);
+    }
+
+    body {
+      min-height: 100dvh;
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Crimson Text', serif;
+      display: grid;
+      place-items: center;
+      background-image: url("https://www.transparenttextures.com/patterns/old-wall.png");
+      background-attachment: fixed;
+      overflow: hidden;
+    }
+
+    /* Статичные scanlines (горизонтальные полосы) */
+    .scanlines {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 2px,
+        rgba(0,0,0,0.18) 2px,
+        rgba(0,0,0,0.18) 4px
+      );
+      z-index: 3;
+      opacity: 0.7;
+    }
+
+    /* Двигающийся блик / light leak в полоску */
+    .light-leak {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        transparent 40%,
+        rgba(201,163,71,0.12) 45%,
+        rgba(122,26,46,0.18) 50%,
+        transparent 55%
+      );
+      animation: leak-slide 18s linear infinite;
+      mix-blend-mode: screen;
+      opacity: 0.6;
+      z-index: 2;
+    }
+
+    @keyframes leak-slide {
+      0%   { transform: translateY(-120%); }
+      100% { transform: translateY(120%); }
+    }
+
+    /* Дополнительный быстрый блик (случайный "всплеск") */
+    .light-leak-fast {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(201,163,71,0.25) 48%,
+        rgba(92,15,31,0.3) 52%,
+        transparent
+      );
+      animation: leak-fast 9s ease-in-out infinite;
+      mix-blend-mode: screen;
+      opacity: 0;
+      z-index: 2;
+    }
+
+    @keyframes leak-fast {
+      0%, 20%, 100% { opacity: 0; transform: translateY(-50%); }
+      22%, 28%      { opacity: 0.4; transform: translateY(0); }
+      30%           { opacity: 0; }
+    }
+
+    .container {
+      text-align: center;
+      padding: 3.5rem 4.5rem;
+      border: 5px double var(--bordowy-light);
+      background: rgba(20, 0, 3, 0.65);
+      box-shadow: var(--shadow), inset 0 0 60px rgba(0,0,0,0.8);
+      border-radius: 6px;
+      max-width: 780px;
+      width: 90%;
+      position: relative;
+      z-index: 4;
+      animation: flicker 4s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; filter: brightness(1) contrast(1); }
+      50%      { opacity: 0.96; filter: brightness(1.04) contrast(1.06); }
+    }
+
+    /* Chromatic aberration на таймере */
+    #timer {
+      font-size: 4.8rem;
+      font-weight: bold;
+      color: var(--gold);
+      letter-spacing: 0.12em;
+      text-shadow: 
+        0 0 18px rgba(201,163,71,0.7),
+        3px 3px 0 var(--bordowy),
+        -2px 0 8px rgba(122,26,46,0.6),   /* красный сдвиг */
+        2px 0 8px rgba(201,163,71,0.4);   /* золотой/циан сдвиг */
+      background: linear-gradient(to bottom, #1e0006, #0c0003);
+      padding: 1.2rem 2.8rem;
+      border: 3px solid var(--bordowy-light);
+      border-radius: 8px;
+      display: inline-block;
+      margin: 1rem 0 1.5rem;
+      position: relative;
+      overflow: hidden;
+      animation: aberration 3.5s infinite alternate;
+    }
+
+    @keyframes aberration {
+      0%   { text-shadow: -2px 0 8px rgba(122,26,46,0.6), 2px 0 8px rgba(201,163,71,0.4); }
+      50%  { text-shadow: -4px 0 12px rgba(122,26,46,0.8), 4px 0 12px rgba(201,163,71,0.6); }
+      100% { text-shadow: 2px 0 8px rgba(201,163,71,0.6), -2px 0 8px rgba(122,26,46,0.4); }
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: url("https://www.transparenttextures.com/patterns/noisy.png");
+      opacity: 0.08;
+      mix-blend-mode: overlay;
+      animation: grain-move 6s steps(8) infinite;
+      z-index: 3;
+    }
+
+    @keyframes grain-move {
+      0%   { transform: translate(0,0); }
+      100% { transform: translate(-3%, -2%); }
+    }
+
+    .colon {
+      color: var(--bordowy-light);
+      margin: 0 0.4em;
+      opacity: 0.9;
+    }
+
+    .label {
+      font-size: 1.1rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--bordowy-light);
+      margin-top: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #message {
+      display: none;
+      font-size: 3.4rem;
+      color: var(--gold);
+      text-shadow: 0 0 30px var(--gold), 3px 3px 6px var(--bordowy);
+      line-height: 1.2;
+      margin-top: 2rem;
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      box-shadow: inset 0 0 180px #000, inset 0 0 120px var(--bordowy);
+      z-index: 1;
+    }
+    @media (max-width: 600px) {
+    .container {
+        padding: 2rem 1.5rem;          /* уменьшаем отступы */
+        width: 96%;
+        border-width: 3px;             /* потоньше рамку */
+    }
+
+    #timer {
+        font-size: 3.8rem;             /* или даже 3.2rem – 3.5rem */
+        padding: 0.8rem 1.5rem;
+        letter-spacing: 0.08em;
+    }
+
+    .label {
+        font-size: 0.9rem;
+        letter-spacing: 0.25em;
+        max-width: 100%;               /* снимаем ограничение */
+        flex-wrap: wrap;               /* если не влезает — переносим */
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+        letter-spacing: 0.2em;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Уменьшаем интенсивность эффектов на мобильных */
+    .light-leak,
+    .light-leak-fast {
+        opacity: 0.4;                  /* слабее блики */
+    }
+
+    .grain {
+        opacity: 0.05;                 /* зерно почти незаметно, но экономит ресурсы */
+    }
+
+    .scanlines {
+        background: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 3px,               /* реже полосы */
+        rgba(0,0,0,0.12) 3px,
+        rgba(0,0,0,0.12) 6px
+        );
+    }
+}
+  </style>
+</head>
+<body>
+
+  <div class="vignette"></div>
+  <div class="scanlines"></div>
+  <div class="light-leak"></div>
+  <div class="light-leak-fast"></div>
+  <div class="grain"></div>
+
+  <div class="container">
+
+    <div id="timer">
+      <span id="days">٠٧</span><span class="colon">:</span>
+      <span id="hours">٢٣</span><span class="colon">:</span>
+      <span id="minutes">٣٣</span><span class="colon">:</span>
+      <span id="seconds">٠٠</span>
+    </div>
+
+    <div id="message">ПОЗДРАВЛЯЮ,<br>ТЕБЕ РОВНО НЕДЕЛЯ!</div>
+  </div>
+
+  <script>
+    const targetDate = new Date("2026-02-02T14:30:00+03:00").getTime();
+
+    const easternDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+
+    function toEastern(n) {
+      return n.toString().padStart(2, '0')
+        .split('')
+        .map(d => easternDigits[parseInt(d)])
+        .join('');
+    }
+
+    function update() {
+      const now = Date.now();
+      let dist = targetDate - now;
+
+      if (dist <= 0) {
+        document.getElementById("timer").style.display = "none";
+        document.querySelector("h1").style.display = "none";
+        document.querySelector(".label").style.display = "none";
+        document.getElementById("message").style.display = "block";
+        return;
+      }
+
+      const d = Math.floor(dist / 86400000);
+      const h = Math.floor((dist % 86400000) / 3600000);
+      const m = Math.floor((dist % 3600000) / 60000);
+      const s = Math.floor((dist % 60000) / 1000);
+
+      document.getElementById("days").textContent    = toEastern(d);
+      document.getElementById("hours").textContent   = toEastern(h);
+      document.getElementById("minutes").textContent = toEastern(m);
+      document.getElementById("seconds").textContent = toEastern(s);
+    }
+
+    update();
+    setInterval(update, 1000);
+  </script>
+</body>
+</html>
