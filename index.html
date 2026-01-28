@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>До момента</title>
+  <title>Обратное время</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,700;1,400&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;700&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0f0001;
@@ -14,7 +14,6 @@
       --bordowy-light: #7a1a2e;
       --gold: #c9a347;
       --text: #d9c9a0;
-      --shadow: 0 0 40px rgba(92,15,31,0.6);
     }
 
     body {
@@ -23,7 +22,8 @@
       background: var(--bg);
       color: var(--text);
       font-family: 'Crimson Text', serif;
-      display: flex; /* Центрируем по вертикали и горизонтали */
+      display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       background-image: url("https://www.transparenttextures.com/patterns/old-wall.png");
@@ -31,67 +31,99 @@
       overflow: hidden;
     }
 
-    /* Все твои эффекты без изменений */
-    .vignette { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 180px #000, inset 0 0 120px var(--bordowy); z-index: 1; }
-    .scanlines { position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px); z-index: 3; opacity: 0.7; }
-    .light-leak { position: fixed; inset: 0; pointer-events: none; background: linear-gradient(to bottom, transparent 40%, rgba(201,163,71,0.12) 45%, rgba(122,26,46,0.18) 50%, transparent 55%); animation: leak-slide 18s linear infinite; mix-blend-mode: screen; opacity: 0.6; z-index: 2; }
-    .light-leak-fast { position: fixed; inset: 0; pointer-events: none; background: linear-gradient(to bottom, transparent, rgba(201,163,71,0.25) 48%, rgba(92,15,31,0.3) 52%, transparent); animation: leak-fast 9s ease-in-out infinite; mix-blend-mode: screen; opacity: 0; z-index: 2; }
-    .grain { position: fixed; inset: 0; pointer-events: none; background: url("https://www.transparenttextures.com/patterns/noisy.png"); opacity: 0.08; mix-blend-mode: overlay; animation: grain-move 6s steps(8) infinite; z-index: 3; }
-
-    @keyframes leak-slide { 0% { transform: translateY(-120%); } 100% { transform: translateY(120%); } }
-    @keyframes leak-fast { 0%, 20%, 100% { opacity: 0; transform: translateY(-50%); } 22%, 28% { opacity: 0.4; transform: translateY(0); } 30% { opacity: 0; } }
+    /* Ретро эффекты */
+    .vignette { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 180px #000, inset 0 0 120px var(--bordowy); z-index: 20; }
+    .scanlines { position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, transparent 0, transparent 2px, rgba(0,0,0,0.18) 2px, rgba(0,0,0,0.18) 4px); z-index: 21; opacity: 0.5; }
+    .grain { position: fixed; inset: 0; pointer-events: none; background: url("https://www.transparenttextures.com/patterns/noisy.png"); opacity: 0.08; mix-blend-mode: overlay; z-index: 22; animation: grain-move 6s steps(8) infinite; }
     @keyframes grain-move { 0% { transform: translate(0,0); } 100% { transform: translate(-3%, -2%); } }
 
+    .main-wrapper {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+    }
+
+    /* ЗЕРКАЛЬНЫЙ ЦИФЕРБЛАТ */
+    .clock {
+      width: clamp(260px, 75vw, 420px);
+      height: clamp(260px, 75vw, 420px);
+      border: 6px double var(--bordowy-light);
+      border-radius: 50%;
+      position: relative;
+      background: radial-gradient(circle, #1e0006 0%, #0c0003 100%);
+      box-shadow: 0 0 60px rgba(0,0,0,0.9), inset 0 0 40px var(--bordowy);
+    }
+
+    .clock::after {
+      content: '';
+      position: absolute;
+      width: 10px; height: 10px;
+      background: var(--gold);
+      border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 15;
+    }
+
+    .number {
+      position: absolute;
+      width: 100%; height: 100%;
+      text-align: center;
+      font-family: 'IM Fell English SC', serif;
+      font-size: 1.6rem;
+      color: var(--gold);
+      padding: 12px;
+      box-sizing: border-box;
+      transform-origin: 50% 50%;
+    }
+
+    /* СТРЕЛКИ БЕЗ ТРАНЗИШИНА (чтобы не было "отката") */
+    .hand {
+      position: absolute;
+      bottom: 50%; left: 50%;
+      transform-origin: bottom;
+      background: var(--gold);
+      border-radius: 4px;
+      z-index: 11;
+      transform: translateX(-50%) rotate(0deg);
+    }
+
+    .hour-hand { width: 5px; height: 22%; }
+    .min-hand { width: 3px; height: 32%; opacity: 0.8; }
+    .sec-hand { width: 1.5px; height: 38%; background: #ff3333; box-shadow: 0 0 8px #ff0000; }
+
+    /* ЦИФРОВОЙ ТАЙМЕР */
     .container {
       text-align: center;
-      padding: 2rem 1.5rem;
-      border: 5px double var(--bordowy-light);
-      background: rgba(20, 0, 3, 0.65);
-      box-shadow: var(--shadow), inset 0 0 60px rgba(0,0,0,0.8);
-      border-radius: 6px;
+      padding: 1rem;
+      border: 3px double var(--bordowy-light);
+      background: rgba(20, 0, 3, 0.7);
+      box-shadow: 0 0 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.8);
+      border-radius: 4px;
       width: 85%;
-      max-width: 600px;
-      position: relative;
-      z-index: 4;
-      animation: flicker 4s infinite alternate;
+      max-width: 450px;
     }
 
-    @keyframes flicker { 0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.96; filter: brightness(1.05); } }
-
-    /* Адаптивный таймер */
     #timer {
       direction: rtl;
-      font-size: clamp(2.5rem, 12vw, 4.8rem); /* Уменьшается на маленьких экранах */
+      font-size: clamp(1.8rem, 9vw, 3.8rem);
       font-weight: bold;
       color: var(--gold);
+      text-shadow: 0 0 15px var(--gold), 2px 2px 0 var(--bordowy);
       letter-spacing: 0.05em;
-      text-shadow: 0 0 18px rgba(201,163,71,0.7), 3px 3px 0 var(--bordowy);
-      background: linear-gradient(to bottom, #1e0006, #0c0003);
-      padding: 0.8rem 1rem;
-      border: 2px solid var(--bordowy-light);
-      border-radius: 8px;
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
-      margin: 1rem 0;
-      animation: aberration 3.5s infinite alternate;
-      width: 100%;
-      box-sizing: border-box;
     }
-
-    @keyframes aberration {
-      0% { text-shadow: -2px 0 8px rgba(122,26,46,0.6), 2px 0 8px rgba(201,163,71,0.4); }
-      100% { text-shadow: 2px 0 8px rgba(201,163,71,0.6), -2px 0 8px rgba(122,26,46,0.4); }
-    }
-
-    .colon { color: var(--bordowy-light); margin: 0 0.2em; opacity: 0.9; }
 
     #message {
       display: none;
-      font-size: clamp(1.8rem, 8vw, 3.4rem);
+      font-size: clamp(2rem, 10vw, 4rem);
       color: var(--gold);
-      text-shadow: 0 0 30px var(--gold), 3px 3px 6px var(--bordowy);
-      line-height: 1.2;
+      text-align: center;
+      text-shadow: 0 0 30px var(--gold);
+      font-family: 'IM Fell English SC', serif;
     }
   </style>
 </head>
@@ -99,34 +131,75 @@
 
   <div class="vignette"></div>
   <div class="scanlines"></div>
-  <div class="light-leak"></div>
-  <div class="light-leak-fast"></div>
   <div class="grain"></div>
 
-  <div class="container">
-    <div id="timer">
-      <span id="days">٠٠</span><span class="colon">:</span>
-      <span id="hours">٠٠</span><span class="colon">:</span>
-      <span id="minutes">٠٠</span><span class="colon">:</span>
-      <span id="seconds">٠٠</span>
+  <div class="main-wrapper">
+    
+    <div class="clock" id="clockFrame">
+      <div id="numbers-container"></div>
+      <div class="hand hour-hand" id="hourHand"></div>
+      <div class="hand min-hand" id="minHand"></div>
+      <div class="hand sec-hand" id="secHand"></div>
     </div>
-    <div id="message">ПОЗДРАВЛЯЮ,<br>ТЕБЕ РОВНО НЕДЕЛЯ!</div>
+
+    <div class="container" id="digitalBox">
+      <div id="timer">
+        <span id="days">٠٠</span> :
+        <span id="hours">٠٠</span> :
+        <span id="minutes">٠٠</span> :
+        <span id="seconds">٠٠</span>
+      </div>
+    </div>
+
+    <div id="message">ты реально сидел ждал это?<br>лан, тебе ровно неделя прямо сейчас<br>поздравляю пупсень епт</div>
   </div>
 
   <script>
-    const targetDate = new Date("2026-02-02T14:30:00+03:00").getTime();
     const easternDigits = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+    let targetDate = new Date("2026-02-02T14:30:00+03:00").getTime();
+
+    const clockContainer = document.getElementById('numbers-container');
+    for (let i = 1; i <= 12; i++) {
+        const numDiv = document.createElement('div');
+        numDiv.className = 'number';
+        const angle = -(i * 30); 
+        numDiv.style.transform = `rotate(${angle}deg)`;
+        let displayNum = i.toString().split('').map(d => easternDigits[parseInt(d)]).join('');
+        const span = document.createElement('span');
+        span.textContent = displayNum;
+        span.style.display = 'inline-block';
+        span.style.transform = `rotate(${-angle}deg)`; 
+        numDiv.appendChild(span);
+        clockContainer.appendChild(numDiv);
+    }
 
     function toEastern(n) {
       return n.toString().padStart(2, '0').split('').map(d => easternDigits[parseInt(d)]).join('');
     }
 
     function update() {
-      const now = Date.now();
-      let dist = targetDate - now;
+      const now = new Date();
+      
+      // ИНВЕРСИЯ ВРАЩЕНИЯ СТРЕЛОК
+      const sec = now.getSeconds();
+      const min = now.getMinutes();
+      const hour = now.getHours();
+      
+      // Убираем плавность через CSS и считаем углы так, чтобы они всегда шли в одну сторону
+      const secDeg = -(sec * 6);
+      const minDeg = -(min * 6 + sec * 0.1);
+      const hourDeg = -( (hour % 12) * 30 + min * 0.5 );
+
+      document.getElementById('secHand').style.transform = `translateX(-50%) rotate(${secDeg}deg)`;
+      document.getElementById('minHand').style.transform = `translateX(-50%) rotate(${minDeg}deg)`;
+      document.getElementById('hourHand').style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+
+      // Обратный отсчет
+      let dist = targetDate - now.getTime();
 
       if (dist <= 0) {
-        document.getElementById("timer").style.display = "none";
+        document.getElementById("digitalBox").style.display = "none";
+        document.getElementById("clockFrame").style.display = "none";
         document.getElementById("message").style.display = "block";
         return;
       }
